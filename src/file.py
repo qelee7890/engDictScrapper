@@ -1,5 +1,6 @@
 import sys, os, csv
-from func_crawler import reformat_writer
+from webdict import cambridge, etymology
+from tqdm import tqdm
 
 def findParentPath():
     thisDirPath = os.path.dirname(os.path.abspath(__file__))
@@ -66,6 +67,28 @@ def writeCsvFile(subDirName, csvFileName, wordList):
         fileOpened.close()
         fileOpened = open(filePath, mode="a")
     fileWriter = csv.writer(fileOpened)
-    soundDirPath = makeDir("sound")
-    reformat_writer(fileWriter, wordList, soundDirPath)
+    writeCsvRow(fileWriter, wordList)
     fileOpened.close()
+
+def writeCsvRow(fileWriter, wordList):
+    rowContent = ["WORD", "PHR1", "PHR2", "PHR3",
+                 "DEF1", "DEF2", "DEF3", "ETYM", "AUDI"]
+    soundDirPath = makeDir("sound")
+    for word in tqdm(wordList):
+        defi, news, soundFileTag = cambridge(word, soundDirPath)
+        etym = etymology(word)
+        csvRow = [""] * len(rowContent)
+        csvRow[0] = word
+        for ii in range(0, min(3, len(news))):
+            csvRow[ii + 1] = news[ii]["exa"] \
+                               + " (" + news[ii]["src"] + ")"
+        for ii in range(0, min(3, len(defi))):
+            csvRow[ii + 4] = "<" + defi[ii]["pos"] \
+                               + "> " + defi[ii]["def"] \
+                               + "; " + defi[ii]["exa"]
+        if etym["sub"] == "":
+            csvRow[-2] == ""
+        else:
+            csvRow[-2] = etym["sub"] + "; " + etym["def"]
+        csvRow[-1] = soundFileTag
+        fileWriter.writerow(csvRow)
