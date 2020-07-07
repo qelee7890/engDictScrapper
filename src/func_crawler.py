@@ -1,19 +1,15 @@
-import os  # audio file retrieve
-import urllib.request as url_request
-from urllib.parse import urlparse as url_parse
-
+import os, requests
+import urllib.request as urlReq
+from urllib.parse import urlparse
 from tqdm import tqdm
-import requests
 from bs4 import BeautifulSoup
-
 from func_potato import potato_cutter, potato_squeezer
-from func_file import check_sound_dir
 
-def reformat_writer(csv_writer, list_word):
+def reformat_writer(csv_writer, list_word, soundDirPath):
     row_title = ["WORD", "PHR1", "PHR2", "PHR3",
                  "DEF1", "DEF2", "DEF3", "ETYM", "AUDI"]
     for word in tqdm(list_word):
-        definition, news, anki_sound_tag = cambridge(word)
+        definition, news, anki_sound_tag = cambridge(word, soundDirPath)
         origin = etymology(word)
 
         row_word = [""] * len(row_title)
@@ -32,13 +28,13 @@ def reformat_writer(csv_writer, list_word):
         row_word[-1] = anki_sound_tag
         csv_writer.writerow(row_word)
 
-def cambridge(word):
+def cambridge(word, soundDirPath):
     target = f"https://dictionary.cambridge.org/us/dictionary/english/{word}"
     soup = BeautifulSoup(requests.get(target).text, "html.parser")
     definition = []
     news = []
 
-    sound_file_folder = check_sound_dir(False)
+    sound_file_folder = soundDirPath
 
     potato_tag = ["div", "class", "pr entry-body__el"]
     potatoes = potato_cutter(soup, potato_tag, 3)
@@ -103,8 +99,8 @@ def get_sound(potatoes, sound_file_folder):
                 juice = potato.find("source", {"type": "audio/mpeg"})["src"]
                 sound_file_url = "https://dictionary.cambridge.org" + juice
                 if check_url(sound_file_url):
-                    sound_file_name = os.path.basename(url_parse(sound_file_url).path)
-                    url_request.urlretrieve(sound_file_url,
+                    sound_file_name = os.path.basename(urlparse(sound_file_url).path)
+                    urlReq.urlretrieve(sound_file_url,
                                             sound_file_folder + "/" + sound_file_name)
                     anki_sound_tag = f"[sound:{sound_file_name}]"
                     return anki_sound_tag
@@ -113,7 +109,7 @@ def get_sound(potatoes, sound_file_folder):
 
 def check_url(sound_file_url):
     try:
-        u = url_request.urlopen(sound_file_url)
+        u = urlReq.urlopen(sound_file_url)
         u.close()
         return True
     except:
