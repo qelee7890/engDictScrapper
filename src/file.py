@@ -27,7 +27,7 @@ def isDirExist(dirPath):
     else:
         return False  
 
-def makeSoundDir(subDirName):
+def makeDir(subDirName):
     dirPath = findTargetDirPath(subDirName)
     if not isDirExist(dirPath):
         os.mkdir(dirPath)
@@ -37,8 +37,7 @@ def readCsvFile(subDirName, csvFileName):
     wordList = []
     csvTotalLineNumber = 0
     dirPath = findTargetDirPath(subDirName)
-    if not isDirExist(dirPath):
-        raise ValueError(f"{subDirName} directory does not exist")
+    makeDir(subDirName)
     filePath = joinPath(dirPath, csvFileName)
     if not isFileExist(filePath):
         raise ValueError(f"{csvFileName} file cannot be read")
@@ -54,8 +53,7 @@ def writeCsvFile(subDirName, csvFileName, wordList):
     fileWriter = None
     csvStartLineNumber = 0
     dirPath = findTargetDirPath(subDirName)
-    if not isDirExist(dirPath):
-        raise ValueError(f"{subDirName} directory does not exist")
+    makeDir(subDirName)
     filePath = joinPath(dirPath, csvFileName)
     if not isFileExist(filePath):
         fileOpened = open(filePath, mode="w")
@@ -68,6 +66,6 @@ def writeCsvFile(subDirName, csvFileName, wordList):
         fileOpened.close()
         fileOpened = open(filePath, mode="a")
     fileWriter = csv.writer(fileOpened)
-    soundDirPath = makeSoundDir("sound")
+    soundDirPath = makeDir("sound")
     reformat_writer(fileWriter, wordList, soundDirPath)
     fileOpened.close()

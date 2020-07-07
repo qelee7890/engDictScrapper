@@ -1,4 +1,4 @@
-from file import readCsvFile, writeCsvFile, makeSoundDir
+from file import readCsvFile, writeCsvFile
 
 importFileName = "TIME CNN english words - n-s.csv"
 exportFileName = "anki " + importFileName
