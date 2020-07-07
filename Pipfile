@@ -7,6 +7,9 @@ verify_ssl = true
 pylint = "*"
 
 [packages]
+tqdm = "*"
+requests = "*"
+bs4 = "*"
 
 [requires]
 python_version = "3.7"
